@@ -15,7 +15,6 @@ export class AuthController {
   async signUp(
     @Body(ValidationPipe) userSignUpDto: UserSignUpDto,
   ): Promise<LoginInfoDto> {
-    console.log("tell me something", userSignUpDto)
     return await this.authService.signUp(userSignUpDto);
   }
 

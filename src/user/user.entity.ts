@@ -1,12 +1,20 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { USER_ROLE } from './enum/user-role.enum';
 import * as argon2 from 'argon2';
+import { HobbyEntity } from 'src/hobby/hobby.entity';
 
 
 @Entity()
 export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @ManyToMany(() => HobbyEntity, (hobby) => hobby.users)
+  @JoinTable()
+  hobbies: HobbyEntity[];
+
+  @OneToMany(() => HobbyEntity, hobby => hobby.creator)
+  createdHobbies: HobbyEntity[]; // Всі хобі, створені користувачем
 
   @Column()
   email: string;
@@ -25,6 +33,10 @@ export class UserEntity {
 
   @Column({ default: USER_ROLE.USER })
   role: USER_ROLE;
+
+  // @Column({nullable: true})
+  // savedHobbies: HobbyEntity[];
+
 
   // Хешування пароля
   static async hashPassword(password: string): Promise<string> {

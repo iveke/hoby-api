@@ -18,6 +18,12 @@ export class UserRepository {
   async createUser(createUserDto: UserSignUpDto): Promise<UserEntity> {
     const { password, email } = createUserDto;
 
+    const isUserExist = this.repository.findOne({ where: { email: email } });
+
+    if (isUserExist) {
+      throw new BadRequestException(AUTH_ERROR.USER_ALREADY_EXISTS);
+    }
+    
     const user: UserEntity = new UserEntity();
 
     user.password = await argon2.hash(password);
