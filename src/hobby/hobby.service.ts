@@ -31,12 +31,29 @@ export class HobbyService {
     updateHobbyDto: UpdateHobbyDto,
     userId: string,
   ) {
-    this.hobbyRepository.updateHobby(id, updateHobbyDto, userId);
+    return await this.hobbyRepository.updateHobby(id, updateHobbyDto, userId);
   }
 
-  addHobbyToUser(userId: string, hobbyId: number) {
-    this.hobbyRepository.addHobbyToUser(userId, hobbyId);
+  async addHobbyToUser(userId: string, hobbyId: number) {
+    return await this.hobbyRepository.addHobbyToUser(userId, hobbyId);
   }
+
+  async removeHobbyFromUser(userId: string, hobbyId: number) {
+    return await this.hobbyRepository.removeHobbyFromUser(userId, hobbyId);
+  }
+
+  async getHobby(hobbyId: number) {
+    return await this.hobbyRepository.getHobby( hobbyId);
+  }
+
+  async getHobbyList(userId: string){
+    return await this.hobbyRepository.getHobbyList(userId);
+  }
+
+  async getHobbyListAdmin(){
+    return await this.hobbyRepository.getHobbyListAdmin();
+  }
+
 
   async deleteHobby(id: number, user: UserEntity) {
     await this.hobbyRepository.deleteHobby(id, user);

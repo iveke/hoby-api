@@ -1,19 +1,45 @@
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { USER_ROLE } from './enum/user-role.enum';
 import * as argon2 from 'argon2';
 import { HobbyEntity } from 'src/hobby/hobby.entity';
-
+import { ReviewsEntity } from 'src/reviews/reviews.entity';
+import { ChallangeEntity } from 'src/challange/challange.entity';
 
 @Entity()
 export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @CreateDateColumn({ type: 'timestamp' })
+  createDate: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updateDate: Date;
+
   @ManyToMany(() => HobbyEntity, (hobby) => hobby.users)
   @JoinTable()
   hobbies: HobbyEntity[];
 
-  @OneToMany(() => HobbyEntity, hobby => hobby.creator)
+  // @ManyToMany(() => ChallangeEntity, (challange) => challange.users)
+  // @JoinTable()
+  // challanges: ChallangeEntity[];
+
+  @OneToMany(() => ChallangeEntity, (challange) => challange.creator)
+  createdChallange: ChallangeEntity[]; // Всі хобі, створені користувачем
+
+  @OneToMany(() => ReviewsEntity, (review) => review.creator)
+  reviews: ReviewsEntity[]; // Всі хобі, створені користувачем
+
+  @OneToMany(() => HobbyEntity, (hobby) => hobby.creator)
   createdHobbies: HobbyEntity[]; // Всі хобі, створені користувачем
 
   @Column()
@@ -31,12 +57,16 @@ export class UserEntity {
   @Column({ nullable: true })
   birthDay?: Date;
 
-  @Column({ default: USER_ROLE.USER })
+  @Column({
+    type: 'enum',
+    enum: USER_ROLE,
+    default: USER_ROLE.USER,
+    nullable: true,
+  })
   role: USER_ROLE;
 
   // @Column({nullable: true})
   // savedHobbies: HobbyEntity[];
-
 
   // Хешування пароля
   static async hashPassword(password: string): Promise<string> {

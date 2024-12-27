@@ -1,4 +1,12 @@
-import { Column, Entity, ManyToMany,  ManyToOne,  PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { HOBBY_TYPE } from './enum/hobby-type.enum';
 import { UserEntity } from 'src/user/user.entity';
 
@@ -6,6 +14,12 @@ import { UserEntity } from 'src/user/user.entity';
 export class HobbyEntity {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createDate: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updateDate: Date;
 
   @ManyToMany(() => UserEntity, (user) => user.hobbies, {
     nullable: true,
@@ -28,7 +42,9 @@ export class HobbyEntity {
   @Column({ nullable: true })
   neededThing?: string;
 
-  @ManyToOne(() => UserEntity, user => user.createdHobbies, { nullable: false })
+  @ManyToOne(() => UserEntity, (user) => user.createdHobbies, {
+    nullable: true,
+  })
   creator: UserEntity; // Зв'язок із користувачем
 
   @Column('uuid')

@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { JwtPayload } from './interface/jwt-payload.interface';
 import { UserEntity } from '../user/user.entity';
-import { FindOneOptions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AUTH_ERROR } from './enum/auth-error.enum';
 
@@ -18,15 +18,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.JWT_SECRET_PRIVATE,
+      secretOrKey: process.env.JWT_SECRET,
     });
   }
 
   async validate(payload: JwtPayload): Promise<UserEntity> {
     const { id } = payload;
+
     const user = await this.AuthRepository.findOne({
-      id,
-    } as FindOneOptions<UserEntity>);
+      where: { id },
+    });
+
 
     if (user === undefined) {
       throw new UnauthorizedException(AUTH_ERROR.UNAUTHORIZED);

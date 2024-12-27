@@ -28,8 +28,7 @@ export class AuthService {
   async login(userLoginDto: UserLoginDto): Promise<LoginInfoDto> {
     const { email, password } = userLoginDto;
 
-    let user: UserEntity = null;
-
+    let user;
     if (email) {
       user = await this.userRepository.FindUser(email);
     }

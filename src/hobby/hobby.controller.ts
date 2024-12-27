@@ -2,9 +2,11 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Patch,
   Post,
+  UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
 import { HobbyService } from './hobby.service';
@@ -14,40 +16,68 @@ import { UserEntity } from 'src/user/user.entity';
 import { UpdateHobbyDto } from './dto/update-hobby.dto';
 import { Roles } from 'src/user/decorator/role.decorator';
 import { USER_ROLE } from 'src/user/enum/user-role.enum';
+import { AuthGuard } from '@nestjs/passport';
+import { AccountGuard } from 'src/user/guard/account.guard';
 
 @Controller('hobby')
 export class HobbyController {
   constructor(private readonly hobbyService: HobbyService) {}
 
   @Post('/create')
-  //   @UseGuards(AuthGuard())
-  createHobby(
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  async createHobby(
     @Body(ValidationPipe) createHobbyDto: CreateHobbyDto,
     @GetAccount() user: UserEntity,
   ) {
-    return this.hobbyService.createHobby(createHobbyDto, user.id);
+    return await this.hobbyService.createHobby(createHobbyDto, user.id);
   }
 
   @Patch('/update/:id')
-  updateHobby(
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  async updateHobby(
     @Param('id') id: number,
     @Body(ValidationPipe) updateHobbyDto: UpdateHobbyDto,
     @GetAccount() user: UserEntity, // Отримуємо інформацію про користувача з токена
   ) {
-    return this.hobbyService.updateHobby(id, updateHobbyDto, user.id);
+    return await this.hobbyService.updateHobby(id, updateHobbyDto, user.id);
   }
 
-  @Patch()
-  addHobbyToUser(
-    @Param('hobbyID') hobbyId: number,
-    @GetAccount() user: UserEntity,
-  ) {
-    this.hobbyService.addHobbyToUser(user.id, hobbyId);
+  @Post('join/:id')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  async addHobbyToUser(@Param('id') hobbyId: number, @GetAccount() user: UserEntity) {
+    return await this.hobbyService.addHobbyToUser(user.id, hobbyId);
+  }
+
+  @Post('left/:id')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  async removeHobbyFromUser(@Param('id') hobbyId: number, @GetAccount() user: UserEntity) {
+    return await this.hobbyService.removeHobbyFromUser(user.id, hobbyId);
+  }
+
+  @Get('/:id')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  async getHobby(@Param('id') hobbyId: number) {
+    return await this.hobbyService.getHobby(hobbyId);
+  }
+
+  @Get('user/list')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  async getHobbyList(@GetAccount() user: UserEntity) {
+    console.log('hello');
+    return await this.hobbyService.getHobbyList(user.id);
+  }
+
+  @Get('/admin/list')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
+  @Roles(USER_ROLE.ADMIN)
+  async getHobbyListAdmin() {
+    return await this.hobbyService.getHobbyListAdmin();
   }
 
   @Delete('/delete/:id')
+  @UseGuards(AuthGuard('jwt'), AccountGuard)
   @Roles(USER_ROLE.ADMIN, USER_ROLE.USER) // Дозволяємо доступ для адміністратора та звичайного користувача
-  deleteHobby(@Param('id') id: number, @GetAccount() user: UserEntity) {
-    return this.hobbyService.deleteHobby(id, user);
+  async deleteHobby(@Param('id') id: number, @GetAccount() user: UserEntity) {
+    return await this.hobbyService.deleteHobby(id, user);
   }
 }
