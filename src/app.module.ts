@@ -14,7 +14,7 @@ import { ChallangeModule } from './challange/challange.module';
       useFactory: () => ({
         type: 'postgres',
         host: 'localhost',
-        port: 5432,
+        port: Number(process.env.DB_PORT),
         username: 'postgres',
         password: 'iveketkach05',
         database: 'hobby',
