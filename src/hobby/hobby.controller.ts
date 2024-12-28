@@ -69,7 +69,7 @@ export class HobbyController {
 
   @Get('/admin/list')
   @UseGuards(AuthGuard('jwt'), AccountGuard)
-  @Roles(USER_ROLE.ADMIN)
+  // @Roles(USER_ROLE.ADMIN)
   async getHobbyListAdmin() {
     return await this.hobbyService.getHobbyListAdmin();
   }

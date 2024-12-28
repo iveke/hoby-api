@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Post, UseGuards, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  UseGuards,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserSignUpDto } from './dto/create-user.dto';
 import { LoginInfoDto } from './dto/login-info.dto';
@@ -14,20 +21,20 @@ export class AuthController {
   @Post('/signup')
   async signUp(
     @Body(ValidationPipe) userSignUpDto: UserSignUpDto,
-  ): Promise<LoginInfoDto> {
+  ) {
     return await this.authService.signUp(userSignUpDto);
   }
 
   @Post('/login')
-  logIn(
+  async login(
     @Body(ValidationPipe) userLoginDto: UserLoginDto,
-  ): Promise<LoginInfoDto> {
-    return this.authService.login(userLoginDto);
+  ) {
+    return await this.authService.login(userLoginDto);
   }
 
   @Get('/token')
   @UseGuards(AuthGuard())
-  checkToken(@GetAccount() account: UserEntity): Promise<LoginInfoDto> {
-    return this.authService.updateLogin(account);
+  async checkToken(@GetAccount() account: UserEntity): Promise<LoginInfoDto> {
+    return await this.authService.updateLogin(account);
   }
 }

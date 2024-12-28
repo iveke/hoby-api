@@ -1,0 +1,844 @@
+openapi: 3.0.1
+info:
+  version: 5.0.0
+  title: User Authentication API
+  description: API для роботи з модулями авторизації та користувачів
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: Auth
+    description: Authentication endpoints
+  - name: User
+    description: User endpoints
+  - name: Hobby
+    description: Hobby management endpoints
+paths:
+  /challange/create:
+    post:
+      tags:
+        - Challenge
+      summary: Create a new challenge
+      requestBody:
+        description: Challenge creation data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChallangeDto'
+      responses:
+        '201':
+          description: Challenge created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallangeEntity'
+        '400':
+          description: Invalid request body
+          content: {}
+  /challange/update/{id}:
+    patch:
+      tags:
+        - Challenge
+      summary: Update a challenge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Challenge ID to update
+      requestBody:
+        description: Challenge update data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChallangeDto'
+      responses:
+        '200':
+          description: Challenge updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallangeEntity'
+        '403':
+          description: Forbidden
+          content: {}
+        '404':
+          description: Challenge not found
+          content: {}
+  /challange/update/status/{id}:
+    patch:
+      tags:
+        - Challenge
+      summary: Update the completion status of a challenge for a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Challenge ID to update
+      requestBody:
+        description: Status update data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: boolean
+      responses:
+        '200':
+          description: Challenge status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChallangeEntityShort'
+        '404':
+          description: Challenge not found
+          content: {}
+  /challange/list/all:
+    get:
+      tags:
+        - Challenge
+      summary: Get all challenges
+      responses:
+        '200':
+          description: List of all challenges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChallangeEntityShort'
+  /challange/list/other:
+    get:
+      tags:
+        - Challenge
+      summary: Get challenges not created by the user
+      responses:
+        '200':
+          description: List of other challenges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChallangeEntityShort'
+  /challange/list:
+    get:
+      tags:
+        - Challenge
+      summary: Get completed challenges for the user
+      responses:
+        '200':
+          description: List of completed challenges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChallangeEntityShort'
+  /challange/delete/{id}:
+    delete:
+      tags:
+        - Challenge
+      summary: Delete a challenge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Challenge ID to delete
+      responses:
+        '200':
+          description: Challenge deleted successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Challenge successfully deleted
+        '403':
+          description: Forbidden
+          content: {}
+        '404':
+          description: Challenge not found
+          content: {}
+  /review/create:
+    post:
+      tags:
+        - Review
+      summary: Create a new review
+      requestBody:
+        description: Review creation data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewDto'
+      responses:
+        '201':
+          description: Review created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewsEntity'
+        '400':
+          description: Invalid request body
+          content: {}
+  /review/update/{id}:
+    patch:
+      tags:
+        - Review
+      summary: Update a review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Review ID to update
+      requestBody:
+        description: Review update data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReviewDto'
+      responses:
+        '200':
+          description: Review updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewsEntity'
+        '403':
+          description: Forbidden
+          content: {}
+        '404':
+          description: Review not found
+          content: {}
+  /review/list:
+    get:
+      tags:
+        - Review
+      summary: Get all reviews
+      responses:
+        '200':
+          description: List of reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewsEntity'
+  /review/delete/{id}:
+    delete:
+      tags:
+        - Review
+      summary: Delete a review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Review ID to delete
+      responses:
+        '200':
+          description: Review deleted successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Review successfully deleted
+        '403':
+          description: Forbidden
+          content: {}
+        '404':
+          description: Review not found
+          content: {}
+  /hobby/create:
+    post:
+      tags:
+        - Hobby
+      summary: Create a new hobby
+      requestBody:
+        description: Hobby creation data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHobbyDto'
+      responses:
+        '201':
+          description: Hobby created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HobbyEntity'
+        '400':
+          description: Invalid request body
+          content: {}
+  /hobby/update/{id}:
+    patch:
+      tags:
+        - Hobby
+      summary: Update a hobby
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Hobby ID to update
+      requestBody:
+        description: Hobby update data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateHobbyDto'
+      responses:
+        '200':
+          description: Hobby updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HobbyEntity'
+        '403':
+          description: Forbidden
+          content: {}
+        '404':
+          description: Hobby not found
+          content: {}
+  /hobby/{id}:
+    get:
+      tags:
+        - Hobby
+      summary: Retrieve a hobby
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Hobby ID
+      responses:
+        '200':
+          description: Hobby details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HobbyEntityShort'
+        '404':
+          description: Hobby not found
+          content: {}
+  /hobby/user/list:
+    get:
+      tags:
+        - Hobby
+      summary: Get user hobbies
+      responses:
+        '200':
+          description: List of user hobbies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HobbyEntityShort'
+  /hobby/admin/list:
+    get:
+      tags:
+        - Hobby
+      summary: Get all hobbies for admin
+      responses:
+        '200':
+          description: List of all hobbies
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HobbyEntityShort'
+  /hobby/delete/{id}:
+    delete:
+      tags:
+        - Hobby
+      summary: Delete a hobby
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Hobby ID to delete
+      responses:
+        '200':
+          description: Hobby deleted successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: Hobby successfully deleted
+        '403':
+          description: Forbidden
+          content: {}
+        '404':
+          description: Hobby not found
+          content: {}
+  /hobby/join/{id}:
+    post:
+      tags:
+        - Hobby
+      summary: Add a hobby to a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Hobby ID to join
+      responses:
+        '200':
+          description: Hobby added to user successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HobbyJoinLeftUserInfo'
+        '404':
+          description: Hobby or user not found
+          content: {}
+  /hobby/left/{id}:
+    post:
+      tags:
+        - Hobby
+      summary: Remove a hobby from a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Hobby ID to leave
+      responses:
+        '200':
+          description: Hobby removed from user successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HobbyJoinLeftUserInfo'
+        '404':
+          description: Hobby or user not found
+          content: {}
+  /auth/signup:
+    post:
+      tags:
+        - Auth
+      summary: Sign up a new user
+      requestBody:
+        description: User registration data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSignUpDto'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/UserEntity'
+        '400':
+          description: User already exists
+          content: {}
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Log in a user
+      requestBody:
+        description: User login data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginDto'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/UserEntity'
+        '400':
+          description: Invalid credentials
+          content: {}
+  /auth/token:
+    get:
+      tags:
+        - Auth
+      summary: Validate user token
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginInfoDto'
+        '401':
+          description: Unauthorized
+          content: {}
+components:
+  schemas:
+    CreateChallangeDto:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+        status:
+          type: boolean
+          default: false
+        deadline:
+          type: string
+          format: date-time
+    UpdateChallangeDto:
+      type: object
+      properties:
+        text:
+          type: string
+        status:
+          type: boolean
+        deadline:
+          type: string
+          format: date-time
+    ChallangeEntity:
+      type: object
+      properties:
+        id:
+          type: integer
+        createDate:
+          type: string
+          format: date-time
+        updateDate:
+          type: string
+          format: date-time
+        text:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+        userStatuses:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              isCompleted:
+                type: boolean
+              completionDate:
+                type: string
+                format: date-time
+    ChallangeEntityShort:
+      type: object
+      properties:
+        id:
+          type: integer
+        createDate:
+          type: string
+          format: date-time
+        updateDate:
+          type: string
+          format: date-time
+        text:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+        creator:
+          type: object
+          properties:
+            name: 
+              type: string
+            email:
+              type: string
+              format: email
+        isCompleted:
+          type: boolean
+    CreateReviewDto:
+      type: object
+      required:
+        - mark
+      properties:
+        description:
+          type: string
+        mark:
+          type: integer
+    UpdateReviewDto:
+      type: object
+      properties:
+        description:
+          type: string
+        mark:
+          type: integer
+    ReviewsEntity:
+      type: object
+      properties:
+        id:
+          type: integer
+        createDate:
+          type: string
+          format: date-time
+        updateDate:
+          type: string
+          format: date-time
+        description:
+          type: string
+        mark:
+          type: integer
+        creator:
+          type: object
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+              format: email
+    CreateHobbyDto:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+        type:
+          type: integer
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+          description: Hobby type (1 = Intellectual, 2 = Social, 3 = Art, 4 = Sport)
+        description:
+          type: string
+        neededThing:
+          type: string
+        interestFact:
+          type: string
+    UpdateHobbyDto:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: integer
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+          description: Hobby type (1 = Intellectual, 2 = Social, 3 = Art, 4 = Sport)
+        description:
+          type: string
+        neededThing:
+          type: string
+        interestFact:
+          type: string
+    HobbyEntity:
+      type: object
+      properties:
+        id:
+          type: integer
+        createDate:
+          type: string
+          format: date-time
+        updateDate:
+          type: string
+          format: date-time
+        name:
+          type: string
+        type:
+          type: integer
+        description:
+          type: string
+        neededThing:
+          type: string
+        interestFact:
+          type: string
+        creatorId:
+          type: string
+          format: uuid
+    HobbyEntityShort: 
+        type: object
+        properties:
+          id:
+            type: integer
+          createDate:
+            type: string
+            format: date-time
+          updateDate:
+            type: string
+            format: date-time
+          typee:
+            type: integer
+          name:
+            type: string
+          description:
+            type: string
+          neededThing:
+            type: string
+          interestFact:
+            type: string
+          creator:
+            type: object
+            description: Creator Info
+            properties:
+              name:
+                type: string
+              email:
+                type: string
+                format: email
+          savedCount:
+            type: number
+    UserSignUpDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        name:
+          type: string
+        phone:
+          type: string
+        birthDay:
+          type: string
+          format: date
+    UserLoginDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    LoginInfoDto:
+      type: object
+      properties:
+        accessToken:
+          type: string
+    HobbyJoinLeftUserInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        phone:
+          type: string
+        birthDay:
+          type: string
+          format: date
+          example: 2007-01-26T22:00:00.000Z
+        role:
+          type: string
+          enum:
+            - ADMIN
+            - USER
+          default: USER
+        hobbies:
+          type: array
+          items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 7
+                  createDate:
+                    type: string
+                    format: date-time
+                    example: "2024-12-17T21:38:49.442Z"
+                  updateDate:
+                    type: string
+                    format: date-time
+                    example: "2024-12-17T21:38:49.442Z"
+                  name:
+                    type: string
+                    example: "Footbool"
+                  type:
+                    type: integer
+                    example: 4
+                  description:
+                    type: string
+                    example: "this"
+                  interestFact:
+                    type: string
+                    example: "Ronaldo it`s G.O.A.T"
+                  neededThing:
+                    type: string
+                    example: "boll and motivaltion"
+                  creatorId:
+                    type: string
+                    example: "2e6a0503-ea1c-4374-9b9a-a355eb1c30c1"
+    UserEntity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        phone:
+          type: string
+        birthDay:
+          type: string
+          format: date
+          example: 2007-01-26T22:00:00.000Z
+        role:
+          type: string
+          enum:
+            - ADMIN
+            - USER
+          default: USER
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

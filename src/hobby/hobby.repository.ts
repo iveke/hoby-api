@@ -6,6 +6,7 @@ import { CreateHobbyDto } from './dto/create-hobby.dto';
 import { UpdateHobbyDto } from './dto/update-hobby.dto';
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
@@ -24,8 +25,14 @@ export class HobbyRepository {
       ...createHobbyDto,
       creator,
     });
-
-    return await this.repository.save(hobby);
+    await this.repository.save(hobby);
+    return {
+      ...hobby,
+      creator: {
+        ...hobby.creator,
+        password: undefined,
+      },
+    };
   }
 
   async updateHobby(
@@ -47,10 +54,17 @@ export class HobbyRepository {
     }
 
     Object.assign(hobby, updateHobbyDto); // Оновлюємо лише передані поля
-    return this.repository.save(hobby); // Зберігаємо зміни
+    await this.repository.save(hobby);
+    return {
+      ...hobby,
+      creator: {
+        ...hobby.creator,
+        password: undefined,
+      },
+    }; // Зберігаємо зміни
   }
 
-  async addHobbyToUser(userId: string, hobbyId: number): Promise<UserEntity> {
+  async addHobbyToUser(userId: string, hobbyId: number) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['hobbies'],
@@ -58,19 +72,33 @@ export class HobbyRepository {
     const hobby = await this.repository.findOne({
       where: { id: hobbyId },
     });
-
-    if (user && hobby) {
-      user.hobbies.push(hobby); // Додаємо хобі до списку хобі користувача
-      return await this.userRepository.save(user);
+  
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
-
-    throw new Error('User or Hobby not found');
+    if (!hobby) {
+      throw new NotFoundException('Hobby not found');
+    }
+    // if (!user || !hobby) {
+    //   throw new NotFoundException('User or Hobby not found');
+    // }
+  
+    // Перевіряємо, чи вже додано це хобі до списку хобі користувача
+    if (user.hobbies.some(hobby => hobby.id == hobbyId)) {
+      throw new ConflictException('This hobby is already added to the user');
+    }
+  
+    // Додаємо хобі до списку хобі користувача
+    user.hobbies.push(hobby);
+    await this.userRepository.save(user);
+  
+    return { ...user, password: undefined };
   }
 
   async removeHobbyFromUser(
     userId: string,
     hobbyId: number,
-  ): Promise<UserEntity> {
+  ) {
     // Знайти користувача з його хобі
     const user = await this.userRepository.findOne({
       where: { id: userId },
@@ -78,7 +106,7 @@ export class HobbyRepository {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     // Перевірка чи хобі існує
@@ -87,14 +115,25 @@ export class HobbyRepository {
     });
 
     if (!hobby) {
-      throw new Error('Hobby not found');
+      throw new NotFoundException('Hobby not found');
+    }
+
+    // if (user.hobbies.some(hobby => hobby.id != hobbyId)) {
+    //   throw new ConflictException('This hobby is already removed from saved user\'s hobby ');
+    // }
+
+    const hobbyExists = user.hobbies.some(hobby => hobby.id == hobbyId);
+
+    if (!hobbyExists) {
+      throw new ConflictException('This hobby is not in the user\'s hobbies list and cannot be removed');
     }
 
     // Видалити хобі зі списку користувача
     user.hobbies = user.hobbies.filter((h) => h.id != hobbyId);
 
-    // Зберегти оновленого користувача
-    return await this.userRepository.save(user);
+    await this.userRepository.save(user);
+  
+    return { ...user, password: undefined };
   }
 
   async getHobby(hobbyId: number) {
@@ -113,10 +152,13 @@ export class HobbyRepository {
         'hobby.interestFact',
         'hobby.neededThing',
         'creator.name',
+        'creator.email'
       ])
       .addSelect('COUNT(user.id)', 'userCount') // Підрахунок користувачів
       .groupBy('hobby.id') // Групування по хобі
-      .addGroupBy('creator.name'); // У випадку використання SELECT на creator
+      .addGroupBy('creator.name')
+      .addGroupBy('creator.email');
+      // У випадку використання SELECT на creator
 
     const hobby = await query.getRawOne();
 
@@ -130,11 +172,14 @@ export class HobbyRepository {
       createDate: hobby.hobby_createDate,
       updateDate: hobby.hobby_updateDate,
       name: hobby.hobby_name,
-      type: hobby.hobyy_type,
+      type: hobby.hobby_type,
       description: hobby.hobby_description,
       interestFact: hobby.hobby_interestFact,
       neededThing: hobby.hobby_neededThing,
-      creatorName: hobby.creator_name,
+      creator: {
+        name: hobby.creator_name,
+        email:  hobby.creator_email,
+      },
       savedCount: parseInt(hobby.userCount, 10),
     };
     // return hobby;
@@ -156,10 +201,13 @@ export class HobbyRepository {
         'hobby.interestFact',
         'hobby.neededThing',
         'creator.name',
+        'creator.email'
       ])
       .addSelect('COUNT(users.id)', 'userCount') // Підрахунок користувачів
       .groupBy('hobby.id') // Групування по хобі
-      .addGroupBy('creator.name');
+      .addGroupBy('creator.name')
+      .addGroupBy('creator.email');
+
 
     console.log(query.getSql());
 
@@ -173,11 +221,14 @@ export class HobbyRepository {
         createDate: hobby.hobby_createDate,
         updateDate: hobby.hobby_updateDate,
         name: hobby.hobby_name,
-        type: hobby.hobyy_type,
+        type: hobby.hobby_type,
         description: hobby.hobby_description,
         interestFact: hobby.hobby_interestFact,
         neededThing: hobby.hobby_neededThing,
-        creatorName: hobby.creator_name,
+        creator: {
+          name: hobby.creator_name,
+          email:  hobby.creator_email,
+        },
         savedCount: parseInt(hobby.userCount, 10),
       };
     });
@@ -204,7 +255,8 @@ export class HobbyRepository {
       ])
       .addSelect('COUNT(users.id)', 'userCount') // Підрахунок користувачів
       .groupBy('hobby.id') // Групування по хобі
-      .addGroupBy('creator.name');
+      .addGroupBy('creator.name')
+      .addGroupBy('creator.email');
 
     const hobbyList = await query.getRawMany();
 
@@ -215,12 +267,14 @@ export class HobbyRepository {
         createDate: hobby.hobby_createDate,
         updateDate: hobby.hobby_updateDate,
         name: hobby.hobby_name,
-        type: hobby.hobyy_type,
+        type: hobby.hobby_type,
         description: hobby.hobby_description,
         interestFact: hobby.hobby_interestFact,
         neededThing: hobby.hobby_neededThing,
-        creatorName: hobby.creator_name,
-        creatorEmail: hobby.creator_email,
+        creator: {
+          name: hobby.creator_name,
+          email:  hobby.creator_email,
+        },
         savedCount: parseInt(hobby.userCount, 10),
       };
     });

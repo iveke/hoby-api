@@ -28,8 +28,8 @@ export class ChallangeServie {
       ...createChallangeDto,
       creator,
     });
-
-    return await this.repository.save(challange);
+    await this.repository.save(challange);
+    return { ...challange, creator: undefined };
   }
 
   async updateChallange(
@@ -53,7 +53,8 @@ export class ChallangeServie {
     }
 
     Object.assign(challange, updateChallangeDto); // Оновлюємо лише передані поля
-    return this.repository.save(challange); // Зберігаємо зміни
+    await this.repository.save(challange);
+    return { ...challange, creator: undefined }; // Зберігаємо зміни
   }
 
   async completeChallangeForUser(
@@ -63,39 +64,46 @@ export class ChallangeServie {
   ) {
     const challenge = await this.repository.findOne({
       where: { id: challangeId },
+      relations: ['creator'],
     });
 
     if (!challenge) {
-      throw new Error('Challenge not found');
+      throw new NotFoundException('Challenge not found');
     }
 
-    // Оновлення статусу для конкретного користувача
-    if (status == true) {
+    // Перевірка, чи є вже запис для цього користувача
+    if (!challenge.userStatuses[user.id]) {
+      // Якщо запису немає, створюємо новий
       challenge.userStatuses[user.id] = {
-        isCompleted: true,
-        completionDate: new Date(),
+        isCompleted: status, // Встановлюємо початковий статус
+        completionDate: status ? new Date() : null, // Дата завершення залежить від статусу
+      };
+    } else {
+      // Якщо запис вже існує, оновлюємо статус
+      challenge.userStatuses[user.id] = {
+        isCompleted: status,
+        completionDate: status ? new Date() : null,
       };
     }
 
-    if (status == false) {
-      challenge.userStatuses[user.id] = {
-        isCompleted: false,
-        completionDate: null,
-      };
-    }
-
+    // Зберігаємо зміни
     const formattedChallange = await this.repository.save(challenge);
-
+    console.log(formattedChallange);
     return {
       ...formattedChallange,
-      userStatuses: undefined,
-      isCompleted: formattedChallange.userStatuses[user.id].isCompleted,
+      creator: {
+        name: formattedChallange.creator.name,
+        email: formattedChallange.creator.email,
+      },
+      userStatuses: undefined, // Не повертаємо userStatuses
+      isCompleted: formattedChallange.userStatuses[user.id]?.isCompleted,
     };
   }
 
   async getCompletedChallangeList(userId: string) {
     const query = await this.repository
       .createQueryBuilder('challange')
+      .leftJoinAndSelect('challange.creator', 'creator')
       .where(`challange.userStatuses::jsonb -> :userId IS NOT NULL`, { userId })
       .andWhere(
         `challange.userStatuses::jsonb -> :userId ->> 'isCompleted' = 'true'`,
@@ -107,6 +115,10 @@ export class ChallangeServie {
     return challagneList.map((challange) => {
       return {
         ...challange,
+        creator: {
+          name: challange.creator.name,
+          email: challange.creator.email,
+        },
         userStatuses: undefined,
         isCompleted: true,
       };
@@ -153,6 +165,7 @@ export class ChallangeServie {
         userStatuses: undefined,
         creator: {
           name: challange.creator.name,
+          email: challange.creator.email,
         }, // Додаємо нове поле
       };
     });
@@ -189,6 +202,7 @@ export class ChallangeServie {
         userStatuses: undefined,
         creator: {
           name: challange.creator.name,
+          email: challange.creator.email,
         }, // Додаємо нове поле
       };
     });

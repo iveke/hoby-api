@@ -26,7 +26,14 @@ export class ReviewsService {
       throw new Error('Invalid data: Missing creator or mark');
     }
 
-    return await this.repository.save(review);
+    await this.repository.save(review);
+    return {
+      ...review,
+      creator: {
+        name: review.creator.name,
+        email: review.creator.email,
+      },
+    };
   }
   async updateReview(
     id: number,
@@ -35,7 +42,7 @@ export class ReviewsService {
   ) {
     const review = await this.repository.findOne({
       where: { id },
-      relations: ['creator'], // Завантажуємо інформацію про творця
+      relations: ['creator'],
     });
 
     if (!review) {
@@ -46,8 +53,15 @@ export class ReviewsService {
       throw new ForbiddenException('You are not allowed to edit this review');
     }
 
-    Object.assign(review, updateReviewDto); // Оновлюємо лише передані поля
-    return this.repository.save(review); // Зберігаємо зміни
+    Object.assign(review, updateReviewDto);
+    await this.repository.save(review);
+    return {
+      ...review,
+      creator: {
+        name: review.creator.name,
+        email: review.creator.email,
+      },
+    };
   }
 
   async getReviewList() {

@@ -1,4 +1,4 @@
-import { IsBoolean, IsDate, IsOptional, IsString } from 'class-validator';
+import { IsBoolean,  IsOptional, IsString } from 'class-validator';
 
 export class UpdateChallangeDto {
   @IsOptional()
@@ -10,6 +10,5 @@ export class UpdateChallangeDto {
   status: boolean;
 
   @IsOptional()
-  @IsDate()
   deadline: Date;
 }

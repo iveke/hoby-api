@@ -15,17 +15,17 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signUp(userSignUpDto: UserSignUpDto): Promise<LoginInfoDto> {
+  async signUp(userSignUpDto: UserSignUpDto) {
     const user: UserEntity = await this.userRepository.createUser({
       ...userSignUpDto,
     });
 
     const accessToken = await this.createJwt(user);
 
-    return { accessToken };
+    return { accessToken, user: { ...user, password: undefined } };
   }
 
-  async login(userLoginDto: UserLoginDto): Promise<LoginInfoDto> {
+  async login(userLoginDto: UserLoginDto) {
     const { email, password } = userLoginDto;
 
     let user;
@@ -44,8 +44,8 @@ export class AuthService {
 
     const accessToken = await this.createJwt(user);
 
-    const loginInfo: LoginInfoDto = { accessToken };
-    return loginInfo;
+    // const loginInfo: LoginInfoDto = { accessToken };
+    return { accessToken, user: { ...user, password: undefined } };
   }
 
   async updateLogin(user: UserEntity): Promise<LoginInfoDto> {

@@ -47,14 +47,13 @@ export class ChallangeController {
     );
   }
 
-  @Post('update/status/:id')
+  @Patch('update/status/:id')
   @UseGuards(AuthGuard('jwt'), AccountGuard)
   async addHobbyToUser(
     @Param('id') hobbyId: number,
     @Body(ValidationPipe) body: { status: boolean },
     @GetAccount() user: UserEntity,
   ) {
-    console.log(body.status);
     return await this.challangeService.completeChallangeForUser(
       hobbyId,
       user,
@@ -62,10 +61,13 @@ export class ChallangeController {
     );
   }
 
-  @Get('/list/your')
+  @Get('/list/all')
   @UseGuards(AuthGuard('jwt'), AccountGuard)
-  async getChallangeYourList(@GetAccount() user: UserEntity) {
-    return await this.challangeService.getChallangeList(user);
+  async getChallangeYourList(
+    @GetAccount() user: UserEntity,
+    @Param('filterDate') filterDate: Date,
+  ) {
+    return await this.challangeService.getChallangeList(user, filterDate);
   }
   @Get('/list/other')
   @UseGuards(AuthGuard('jwt'), AccountGuard)
