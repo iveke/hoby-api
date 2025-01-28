@@ -7,22 +7,29 @@ import { JwtPayload } from './interface/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 import { UserLoginDto } from './dto/user-login.dto';
 import { AUTH_ERROR } from './enum/auth-error.enum';
+import { UploadService } from 'src/user/upload-file.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
+    private readonly uploadService: UploadService,
   ) {}
 
-  async signUp(userSignUpDto: UserSignUpDto) {
+  async signUp(userSignUpDto: UserSignUpDto, file: Express.Multer.File) {
     const user: UserEntity = await this.userRepository.createUser({
       ...userSignUpDto,
     });
 
+    const fileUrl = await this.uploadService.uploadFile(file, user.id);
+
     const accessToken = await this.createJwt(user);
 
-    return { accessToken, user: { ...user, password: undefined } };
+    return {
+      accessToken,
+      user: { ...user, photo: fileUrl, password: undefined },
+    };
   }
 
   async login(userLoginDto: UserLoginDto) {
