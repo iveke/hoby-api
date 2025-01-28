@@ -13,6 +13,6 @@ export class UserSignUpDto {
   @IsOptional()
   phone: string;
 
-@IsOptional()
-name: string;
+  @IsOptional()
+  name: string;
 }

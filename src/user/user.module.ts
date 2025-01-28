@@ -5,6 +5,7 @@ import { UserService } from './user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from 'src/auth/auth.module';
 import { UserRepository } from './user.repository';
+import { UploadService } from './upload-file.service';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { UserRepository } from './user.repository';
     forwardRef(() => AuthModule),
   ],
   controllers: [UserController],
-  providers: [UserService, UserRepository],
-  exports: [TypeOrmModule, UserRepository, UserService],
+  providers: [UserService, UserRepository, UploadService],
+  exports: [TypeOrmModule, UserRepository, UserService, UploadService],
 })
 export class UserModule {}

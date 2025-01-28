@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
 import { config } from 'dotenv';
+import * as bodyParser from 'body-parser';
+
 
 async function bootstrap() {
   config();
@@ -16,6 +18,8 @@ async function bootstrap() {
       crossOriginOpenerPolicy: false,
     }),
   );
+  app.use(bodyParser.json({ limit: '5mb' }));
+  app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
 
   await app.listen(process.env.PORT || 3003);
 }

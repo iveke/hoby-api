@@ -29,6 +29,9 @@ export class UserEntity {
   @JoinTable()
   hobbies: HobbyEntity[];
 
+  @Column({ nullable: true }) // Поле необов’язкове
+  photo: string;
+
   // @ManyToMany(() => ChallangeEntity, (challange) => challange.users)
   // @JoinTable()
   // challanges: ChallangeEntity[];

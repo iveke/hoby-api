@@ -29,7 +29,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       where: { id },
     });
 
-
     if (user === undefined) {
       throw new UnauthorizedException(AUTH_ERROR.UNAUTHORIZED);
     } else {
