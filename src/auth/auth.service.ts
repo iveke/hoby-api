@@ -22,7 +22,16 @@ export class AuthService {
       ...userSignUpDto,
     });
 
-    const fileUrl = await this.uploadService.uploadFile(file, user.id);
+    let fileUrl = null;
+
+    if (file) {
+      const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        throw new BadRequestException('Недопустимий формат файлу');
+      }
+
+      fileUrl = await this.uploadService.uploadFile(file, user.id);
+    }
 
     const accessToken = await this.createJwt(user);
 

@@ -15,4 +15,7 @@ export class UserSignUpDto {
 
   @IsOptional()
   name: string;
+
+  @IsOptional()
+  file: Express.Multer.File;
 }

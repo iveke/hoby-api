@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -24,18 +23,11 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/signup')
-    @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file'))
   async signUp(
-        @UploadedFile() file: Express.Multer.File,
-    @Body(ValidationPipe) userSignUpDto: UserSignUpDto) {
-    if (!file) {
-      throw new BadRequestException('Файл не передано');
-    }
-
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    if (!allowedMimeTypes.includes(file.mimetype)) {
-      throw new BadRequestException('Недопустимий формат файлу');
-    }
+    @UploadedFile() file: Express.Multer.File,
+    @Body(ValidationPipe) userSignUpDto: UserSignUpDto,
+  ) {
 
 
     return await this.authService.signUp(userSignUpDto, file);
