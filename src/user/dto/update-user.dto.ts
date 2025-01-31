@@ -1,9 +1,9 @@
-import { IsOptional, IsString, IsEmail } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateUserDto {
-  @IsOptional()
-  @IsEmail()
-  email?: string;
+  // @IsOptional()
+  // @IsEmail()
+  // email?: string;
 
   @IsOptional()
   birthDay?: string;
@@ -15,7 +15,10 @@ export class UpdateUserDto {
   @IsString()
   name?: string;
 
+
   @IsOptional()
-  @IsString()
-  password?: string;
+  file?: Express.Multer.File;
+  // @IsOptional()
+  // @IsString()
+  // password?: string;
 }

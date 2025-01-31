@@ -36,11 +36,13 @@ export class UserController {
 
   @Patch('/update')
   @UseGuards(AuthGuard('jwt'), AccountGuard)
+  @UseInterceptors(FileInterceptor('file'))
   async updateUser(
     @Body(ValidationPipe) updateUserDto: UpdateUserDto,
     @GetAccount() user: UserEntity,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return await this.userService.updateUser(updateUserDto, user);
+    return await this.userService.updateUser(updateUserDto, user, file);
   }
 
   @Post('/photo')

@@ -10,11 +10,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { format } from 'date-fns';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UploadService } from './upload-file.service';
 
 export class UserRepository {
   constructor(
     @InjectRepository(UserEntity)
     private readonly repository: Repository<UserEntity>,
+    private readonly uploadService: UploadService,
   ) {}
 
   async createUser(createUserDto: UserSignUpDto): Promise<UserEntity> {
@@ -67,19 +69,32 @@ export class UserRepository {
     }
   }
 
-  async updateUser(userID: string, updateUserDto: UpdateUserDto) {
+  async updateUser(
+    userID: string,
+    updateUserDto: UpdateUserDto,
+    file: Express.Multer.File,
+  ) {
     const user = await this.repository.findOne({
       where: [{ id: userID }],
     });
 
-    const { email, phone, name, birthDay, password } = updateUserDto;
+    const { phone, name, birthDay } = updateUserDto;
 
-    if (email) {
-      user.email = email.toLowerCase();
-    }
+    // if (email) {
+    //   user.email = email.toLowerCase();
+    // }
 
-    if (password) {
-      user.updatePassword(password);
+    // if (password) {
+    //   user.updatePassword(password);
+    // }
+    let fileUrl = null;
+    if (file) {
+      const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        throw new BadRequestException('Недопустимий формат файлу');
+      }
+      fileUrl = await this.uploadService.uploadFile(file, user.id);
+      user.photo = fileUrl;
     }
 
     if (name) {

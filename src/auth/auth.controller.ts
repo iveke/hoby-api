@@ -28,8 +28,6 @@ export class AuthController {
     @UploadedFile() file: Express.Multer.File,
     @Body(ValidationPipe) userSignUpDto: UserSignUpDto,
   ) {
-
-
     return await this.authService.signUp(userSignUpDto, file);
   }
 

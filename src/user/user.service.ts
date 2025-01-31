@@ -12,7 +12,7 @@ export class UserService {
     return { ...userData, password: undefined };
   }
 
-  async updateUser(updateUserDto: UpdateUserDto, user: UserEntity) {
-    return await this.userRepository.updateUser(user.id, updateUserDto);
+  async updateUser(updateUserDto: UpdateUserDto, user: UserEntity, file: Express.Multer.File) {
+    return await this.userRepository.updateUser(user.id, updateUserDto, file);
   }
 }
