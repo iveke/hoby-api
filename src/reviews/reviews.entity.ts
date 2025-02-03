@@ -12,17 +12,13 @@ export class ReviewsEntity {
   @UpdateDateColumn({ type: 'timestamp' })
   updateDate: Date;
 
-  @Column({ nullable: true })
-  description?: string;
-
   @Column()
-  mark: number;
+  description: string;
 
   @ManyToOne(() => UserEntity, (user) => user.reviews, {
     nullable: false,
     onDelete: 'CASCADE', // Відгуки видаляються разом із користувачем
   })
   creator: UserEntity; // Зв'язок із користувачем
-
-  
+ 
 }

@@ -22,8 +22,8 @@ export class ReviewsService {
 
     console.log(review);
 
-    if (!creator || !createReviewDto.mark) {
-      throw new Error('Invalid data: Missing creator or mark');
+    if (!creator) {
+      throw new Error('Invalid data: Missing creator');
     }
 
     await this.repository.save(review);
