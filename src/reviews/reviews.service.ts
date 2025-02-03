@@ -73,7 +73,6 @@ export class ReviewsService {
         'review.createDate',
         'review.updateDate',
         'review.description',
-        'review.mark',
         'creator.name',
         'creator.email',
       ])
