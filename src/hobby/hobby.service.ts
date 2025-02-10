@@ -5,6 +5,7 @@ import { UserEntity } from 'src/user/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateHobbyDto } from './dto/update-hobby.dto';
+import { FILTER_HOBBY } from './dto/filter-hobby.dto';
 
 @Injectable()
 export class HobbyService {
@@ -46,8 +47,8 @@ export class HobbyService {
     return await this.hobbyRepository.getHobby( hobbyId);
   }
 
-  async getHobbyList(userId: string){
-    return await this.hobbyRepository.getHobbyList(userId);
+  async getHobbyList(userId: string, filterOption: FILTER_HOBBY){
+    return await this.hobbyRepository.getHobbyList(userId, filterOption);
   }
 
   async getHobbyListAdmin(){

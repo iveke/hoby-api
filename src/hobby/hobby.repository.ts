@@ -11,6 +11,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { USER_ROLE } from 'src/user/enum/user-role.enum';
+import { FILTER_HOBBY } from './dto/filter-hobby.dto';
 
 export class HobbyRepository {
   constructor(
@@ -72,7 +73,7 @@ export class HobbyRepository {
     const hobby = await this.repository.findOne({
       where: { id: hobbyId },
     });
-  
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -82,23 +83,20 @@ export class HobbyRepository {
     // if (!user || !hobby) {
     //   throw new NotFoundException('User or Hobby not found');
     // }
-  
+
     // Перевіряємо, чи вже додано це хобі до списку хобі користувача
-    if (user.hobbies.some(hobby => hobby.id == hobbyId)) {
+    if (user.hobbies.some((hobby) => hobby.id == hobbyId)) {
       throw new ConflictException('This hobby is already added to the user');
     }
-  
+
     // Додаємо хобі до списку хобі користувача
     user.hobbies.push(hobby);
     await this.userRepository.save(user);
-  
+
     return { ...user, password: undefined };
   }
 
-  async removeHobbyFromUser(
-    userId: string,
-    hobbyId: number,
-  ) {
+  async removeHobbyFromUser(userId: string, hobbyId: number) {
     // Знайти користувача з його хобі
     const user = await this.userRepository.findOne({
       where: { id: userId },
@@ -122,17 +120,19 @@ export class HobbyRepository {
     //   throw new ConflictException('This hobby is already removed from saved user\'s hobby ');
     // }
 
-    const hobbyExists = user.hobbies.some(hobby => hobby.id == hobbyId);
+    const hobbyExists = user.hobbies.some((hobby) => hobby.id == hobbyId);
 
     if (!hobbyExists) {
-      throw new ConflictException('This hobby is not in the user\'s hobbies list and cannot be removed');
+      throw new ConflictException(
+        "This hobby is not in the user's hobbies list and cannot be removed",
+      );
     }
 
     // Видалити хобі зі списку користувача
     user.hobbies = user.hobbies.filter((h) => h.id != hobbyId);
 
     await this.userRepository.save(user);
-  
+
     return { ...user, password: undefined };
   }
 
@@ -152,13 +152,13 @@ export class HobbyRepository {
         'hobby.interestFact',
         'hobby.neededThing',
         'creator.name',
-        'creator.email'
+        'creator.email',
       ])
       .addSelect('COUNT(user.id)', 'userCount') // Підрахунок користувачів
       .groupBy('hobby.id') // Групування по хобі
       .addGroupBy('creator.name')
       .addGroupBy('creator.email');
-      // У випадку використання SELECT на creator
+    // У випадку використання SELECT на creator
 
     const hobby = await query.getRawOne();
 
@@ -178,14 +178,14 @@ export class HobbyRepository {
       neededThing: hobby.hobby_neededThing,
       creator: {
         name: hobby.creator_name,
-        email:  hobby.creator_email,
+        email: hobby.creator_email,
       },
       savedCount: parseInt(hobby.userCount, 10),
     };
     // return hobby;
   }
 
-  async getHobbyList(userId: string) {
+  async getHobbyList(userId: string, filterOption: FILTER_HOBBY) {
     const query = this.repository
       .createQueryBuilder('hobby')
       .innerJoin('hobby.users', 'users')
@@ -201,13 +201,16 @@ export class HobbyRepository {
         'hobby.interestFact',
         'hobby.neededThing',
         'creator.name',
-        'creator.email'
+        'creator.email',
       ])
       .addSelect('COUNT(users.id)', 'userCount') // Підрахунок користувачів
       .groupBy('hobby.id') // Групування по хобі
       .addGroupBy('creator.name')
       .addGroupBy('creator.email');
 
+    if (filterOption.type) {
+      query.andWhere('hobby.type = :type', { type: filterOption.type });
+    }
 
     console.log(query.getSql());
 
@@ -227,7 +230,7 @@ export class HobbyRepository {
         neededThing: hobby.hobby_neededThing,
         creator: {
           name: hobby.creator_name,
-          email:  hobby.creator_email,
+          email: hobby.creator_email,
         },
         savedCount: parseInt(hobby.userCount, 10),
       };
@@ -273,7 +276,7 @@ export class HobbyRepository {
         neededThing: hobby.hobby_neededThing,
         creator: {
           name: hobby.creator_name,
-          email:  hobby.creator_email,
+          email: hobby.creator_email,
         },
         savedCount: parseInt(hobby.userCount, 10),
       };

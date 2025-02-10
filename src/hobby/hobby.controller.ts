@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
@@ -18,6 +19,7 @@ import { Roles } from 'src/user/decorator/role.decorator';
 import { USER_ROLE } from 'src/user/enum/user-role.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { AccountGuard } from 'src/user/guard/account.guard';
+import { FILTER_HOBBY } from './dto/filter-hobby.dto';
 
 @Controller('hobby')
 export class HobbyController {
@@ -62,9 +64,10 @@ export class HobbyController {
 
   @Get('user/list')
   @UseGuards(AuthGuard('jwt'), AccountGuard)
-  async getHobbyList(@GetAccount() user: UserEntity) {
-    console.log('hello');
-    return await this.hobbyService.getHobbyList(user.id);
+  async getHobbyList(
+    @Query() filterOption: FILTER_HOBBY,
+    @GetAccount() user: UserEntity) {
+    return await this.hobbyService.getHobbyList(user.id, filterOption);
   }
 
   @Get('/admin/list')
