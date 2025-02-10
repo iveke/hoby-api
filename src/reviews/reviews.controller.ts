@@ -42,7 +42,7 @@ export class ReviewsController {
   }
 
   @Get('/list')
-  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(AuthGuard('jwt'))
   async getReviewList() {
     return await this.reviewsService.getReviewList();
   }
