@@ -30,8 +30,8 @@ export class ReviewsService {
     return {
       ...review,
       creator: {
-        name: review.creator.name,
-        email: review.creator.email,
+        ...creator,
+        password: undefined,
       },
     };
   }
@@ -75,6 +75,10 @@ export class ReviewsService {
         'review.description',
         'creator.name',
         'creator.email',
+        'creator.photo',
+        'creator.phone',
+        'creator.birthDay',
+        'creator.role',
       ])
       .orderBy('review.createDate', 'DESC');
 
