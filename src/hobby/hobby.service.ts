@@ -44,17 +44,16 @@ export class HobbyService {
   }
 
   async getHobby(hobbyId: number) {
-    return await this.hobbyRepository.getHobby( hobbyId);
+    return await this.hobbyRepository.getHobby(hobbyId);
   }
 
-  async getHobbyList(userId: string, filterOption: FILTER_HOBBY){
+  async getHobbyList(userId: string, filterOption: FILTER_HOBBY) {
     return await this.hobbyRepository.getHobbyList(userId, filterOption);
   }
 
-  async getHobbyListAdmin(){
-    return await this.hobbyRepository.getHobbyListAdmin();
+  async getHobbyListAdmin(filterOption?: string) {
+    return await this.hobbyRepository.getHobbyListAdmin(Number(filterOption));
   }
-
 
   async deleteHobby(id: number, user: UserEntity) {
     await this.hobbyRepository.deleteHobby(id, user);

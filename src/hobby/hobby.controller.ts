@@ -20,6 +20,7 @@ import { USER_ROLE } from 'src/user/enum/user-role.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { AccountGuard } from 'src/user/guard/account.guard';
 import { FILTER_HOBBY } from './dto/filter-hobby.dto';
+// import { HOBBY_TYPE } from './enum/hobby-type.enum';
 
 @Controller('hobby')
 export class HobbyController {
@@ -46,13 +47,19 @@ export class HobbyController {
 
   @Post('join/:id')
   @UseGuards(AuthGuard('jwt'), AccountGuard)
-  async addHobbyToUser(@Param('id') hobbyId: number, @GetAccount() user: UserEntity) {
+  async addHobbyToUser(
+    @Param('id') hobbyId: number,
+    @GetAccount() user: UserEntity,
+  ) {
     return await this.hobbyService.addHobbyToUser(user.id, hobbyId);
   }
 
   @Post('left/:id')
   @UseGuards(AuthGuard('jwt'), AccountGuard)
-  async removeHobbyFromUser(@Param('id') hobbyId: number, @GetAccount() user: UserEntity) {
+  async removeHobbyFromUser(
+    @Param('id') hobbyId: number,
+    @GetAccount() user: UserEntity,
+  ) {
     return await this.hobbyService.removeHobbyFromUser(user.id, hobbyId);
   }
 
@@ -65,16 +72,15 @@ export class HobbyController {
   @Get('user/list')
   @UseGuards(AuthGuard('jwt'), AccountGuard)
   async getHobbyList(
-    @Query() filterOption: FILTER_HOBBY,
-    @GetAccount() user: UserEntity) {
+    @GetAccount() user: UserEntity,
+    @Query() filterOption?: FILTER_HOBBY,
+  ) {
     return await this.hobbyService.getHobbyList(user.id, filterOption);
   }
 
-  @Get('/admin/list')
-  @UseGuards(AuthGuard('jwt'), AccountGuard)
-  // @Roles(USER_ROLE.ADMIN)
-  async getHobbyListAdmin() {
-    return await this.hobbyService.getHobbyListAdmin();
+  @Get('/list/:type')
+  async getHobbyListAdmin(@Param('type') type: string) {
+    return await this.hobbyService.getHobbyListAdmin(type);
   }
 
   @Delete('/delete/:id')

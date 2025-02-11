@@ -238,7 +238,7 @@ export class HobbyRepository {
     // return hobbyList;
   }
 
-  async getHobbyListAdmin() {
+  async getHobbyListAdmin(filterOption?: number) {
     const query = this.repository
       .createQueryBuilder('hobby')
       .leftJoinAndSelect('hobby.users', 'users')
@@ -260,6 +260,10 @@ export class HobbyRepository {
       .groupBy('hobby.id') // Групування по хобі
       .addGroupBy('creator.name')
       .addGroupBy('creator.email');
+
+    if (filterOption) {
+      query.andWhere('hobby.type = :type', { type: filterOption });
+    }
 
     const hobbyList = await query.getRawMany();
 
